@@ -52,8 +52,8 @@ echo "</div>";
 // Scambia code con token
 try {
     // Credenziali: INSERISCI LE TUE CREDENZIALI QUI
-    $clientId = 'TUE_CREDENZIALI';
-    $clientSecret = 'TUE_CREDENZIALI';
+    $clientId = 'TUE_CREDENZIALI_CLIENT_ID';
+    $clientSecret = 'TUE_CREDENZIALI_CLIENT_SECRET';
 
     $redirectUri = 'https://vaglioandpartners.com/test/api/oauth_callback_fixed.php';
     
