@@ -1,9 +1,9 @@
 <?php
 class Config {
     // Credenziali Microsoft Graph API
-    const TENANT_ID = 'TUE_CREDENZIALI_TENANT_ID';
-    const CLIENT_ID = 'TUE_CREDENZIALI_CLIENT_ID';
-    const CLIENT_SECRET = 'TUE_CREDENZIALI_CLIENT_SECRET';
+    const TENANT_ID = 'TUE_CREDENZIALI';
+    const CLIENT_ID = 'TUE_CREDENZIALI';
+    const CLIENT_SECRET = 'TUE_CREDENZIALI';
     
     // File Excel
     const EXCEL_FILE_ID = 'F62D90EC-FBDB-498D-A7D3-EB355FE3A4E1'; // ID del file su OneDrive

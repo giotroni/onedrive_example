@@ -1,7 +1,7 @@
 <?php
 // add_data_to_excel.php - Aggiunge dati alla tabella Excel
 session_start();
-require_once 'microsoft_graph_personale.php';
+require_once 'microsoft_graph_personal.php';
 
 header('Content-Type: text/html; charset=utf-8');
 

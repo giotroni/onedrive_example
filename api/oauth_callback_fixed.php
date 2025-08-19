@@ -52,9 +52,8 @@ echo "</div>";
 // Scambia code con token
 try {
     // Credenziali: INSERISCI LE TUE CREDENZIALI QUI
-    $clientId = 'TUE_CREDENZIALI_CLIENT_ID';
-    $clientSecret = 'TUE_CREDENZIALI_CLIENT_SECRET';
-
+    $clientId = 'TUE_CREDENZIALI';
+    $clientSecret = 'TUE_CREDENZIALI';
     $redirectUri = 'https://vaglioandpartners.com/test/api/oauth_callback_fixed.php';
     
     $tokenUrl = 'https://login.microsoftonline.com/consumers/oauth2/v2.0/token';
