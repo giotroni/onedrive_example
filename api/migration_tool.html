@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrazione Password Legacy - DATI_VP</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 10px 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007cba, #0056b3);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: #333;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007cba;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007cba, #0056b3);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .step-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .step-list h3 {
+            color: #007cba;
+            margin-bottom: 15px;
+        }
+
+        .step-list ol {
+            padding-left: 20px;
+        }
+
+        .step-list li {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .security-notice {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .security-notice h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .back-link a {
+            color: #007cba;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Migrazione Password Legacy</h1>
+            <p>Strumento per convertire password in chiaro a hash sicuri</p>
+            <button id="refreshTokenBtn" class="btn" style="font-size: 12px; padding: 8px 15px; margin-top: 10px; background: #17a2b8; color: white; display: none;">
+                🔄 Rinnova Token
+            </button>
+        </div>
+
+        <div id="alerts"></div>
+
+        <div class="security-notice">
+            <h3>🛡️ Avviso di Sicurezza</h3>
+            <p><strong>Questa operazione è irreversibile</strong> e deve essere eseguita solo da amministratori autorizzati. Tutte le password in chiaro verranno convertite in hash sicuri bcrypt.</p>
+        </div>
+
+        <div class="step-list">
+            <h3>📋 Cosa fa questo strumento:</h3>
+            <ol>
+                <li><strong>Analizza</strong> la tabella ANA_CONSULENTI</li>
+                <li><strong>Identifica</strong> le password ancora in chiaro</li>
+                <li><strong>Converte</strong> ogni password in un hash bcrypt sicuro</li>
+                <li><strong>Aggiorna</strong> il file Excel con i nuovi hash</li>
+                <li><strong>Mantiene</strong> un log completo delle operazioni</li>
+            </ol>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Prima di procedere:</strong><br>
+            • Assicurati di avere un backup del file Excel<br>
+            • Verifica che tutti gli utenti conoscano le loro password attuali<br>
+            • Esegui questa operazione durante orari di bassa attività
+        </div>
+
+        <!-- Form autenticazione amministratore -->
+        <div id="auth-form">
+            <form id="adminAuthForm">
+                <div class="form-group">
+                    <label for="adminPassword">🔐 Password Amministratore</label>
+                    <input type="password" id="adminPassword" name="adminPassword" required 
+                           placeholder="Inserisci la password amministratore">
+                </div>
+                <button type="submit" class="btn btn-warning">
+                    🔓 Autentica e Continua
+                </button>
+            </form>
+        </div>
+
+        <!-- Pannello migrazione (nascosto inizialmente) -->
+        <div id="migration-panel" style="display: none;">
+            <div class="alert alert-info">
+                <strong>✅ Autenticazione riuscita</strong><br>
+                Sei ora autorizzato ad eseguire la migrazione delle password.
+            </div>
+
+            <button id="startMigration" class="btn btn-primary">
+                🚀 Avvia Migrazione Password
+            </button>
+
+            <button id="analyzeOnly" class="btn btn-success">
+                🔍 Solo Analisi (Nessuna Modifica)
+            </button>
+
+            <div class="progress" id="migrationProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p id="progressText">Preparazione...</p>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Elaborazione in corso...</p>
+        </div>
+
+        <div class="back-link">
+            <a href="test_excel_connection.php">← Torna al Test Connessione</a> |
+            <a href="password_manager.html">Gestione Password</a>
+        </div>
+    </div>
+
+    <script>
+        // Sistema di gestione automatica token (stesso del password manager)
+        async function apiCallWithAutoRefresh(endpoint, action, data, maxRetries = 2) {
+            let attempt = 0;
+            
+            while (attempt <= maxRetries) {
+                try {
+                    const response = await fetch(`${endpoint}?action=${action}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Errore del server');
+                    }
+                    
+                    // Se il token è stato refreshato automaticamente, notifica l'utente
+                    if (result.token_refreshed) {
+                        showAlert('🔄 Token rinnovato automaticamente durante l\'operazione', 'info');
+                        setTimeout(() => {
+                            const alerts = document.querySelectorAll('.alert-info');
+                            alerts.forEach(alert => {
+                                if (alert.textContent.includes('Token rinnovato')) {
+                                    alert.style.opacity = '0';
+                                    setTimeout(() => alert.remove(), 300);
+                                }
+                            });
+                        }, 3000);
+                    }
+                    
+                    return result;
+                    
+                } catch (error) {
+                    attempt++;
+                    
+                    // Se è un errore di token e abbiamo retry disponibili
+                    if (attempt <= maxRetries && 
+                        (error.message.includes('token') || 
+                         error.message.includes('401') || 
+                         error.message.includes('Unauthorized') ||
+                         error.message.includes('Token di accesso'))) {
+                        
+                        console.log(`Tentativo ${attempt} di refresh token per migrazione`);
+                        
+                        try {
+                            // Prova a refreshare il token tramite password manager
+                            const refreshResponse = await fetch('password_manager.php?action=refresh-token', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({})
+                            });
+                            
+                            if (refreshResponse.ok) {
+                                const refreshResult = await refreshResponse.json();
+                                if (refreshResult.success) {
+                                    showAlert('🔄 Token rinnovato automaticamente, riprovo operazione...', 'info');
+                                    continue; // Riprova con il nuovo token
+                                }
+                            }
+                        } catch (refreshError) {
+                            console.error('Errore refresh token:', refreshError);
+                        }
+                    }
+                    
+                    // Altri errori o retry esauriti
+                    throw error;
+                }
+            }
+        }
+
+        // Verifica stato token e connessione
+        async function checkTokenStatus() {
+            try {
+                const response = await fetch('password_manager.php?action=check-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.token_info && result.token_info.expires_in_seconds < 1800) {
+                        const minutes = Math.floor(result.token_info.expires_in_seconds / 60);
+                        showAlert(`⏰ Attenzione: Token scade tra ${minutes} minuti`, 'warning');
+                    }
+                    return true;
+                } else {
+                    if (result.requires_reauth) {
+                        showAlert('🔄 Token scaduto. <a href="authorize_excel.php" style="color: inherit; text-decoration: underline;">Riautorizza l\'accesso</a>', 'warning');
+                    }
+                    return false;
+                }
+            } catch (error) {
+                showAlert('❌ Errore verifica token: ' + error.message, 'error');
+                return false;
+            }
+        }
+        // Autenticazione amministratore con gestione token
+        document.getElementById('adminAuthForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('adminPassword').value;
+            showLoading(true);
+            
+            try {
+                // Prima verifica lo stato del token
+                const tokenOk = await checkTokenStatus();
+                if (!tokenOk) {
+                    showAlert('⚠️ Problema con il token di accesso. Verifica la connessione a OneDrive.', 'warning');
+                }
+                
+                const result = await apiCallWithAutoRefresh('migrate_passwords.php', 'authenticate', { 
+                    password: password 
+                });
+                
+                if (result.success) {
+                    document.getElementById('auth-form').style.display = 'none';
+                    document.getElementById('migration-panel').style.display = 'block';
+                    showAlert('✅ Autenticazione amministratore riuscita', 'success');
+                    
+                    // Esegui analisi automatica
+                    await analyzePasswords();
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                if (error.message.includes('Riautorizzazione richiesta') || 
+                    error.message.includes('Token di accesso')) {
+                    showAlert('🔄 Token scaduto. <a href="authorize_excel.php" style="color: inherit; text-decoration: underline;">Riautorizza l\'accesso</a>', 'warning');
+                } else {
+                    showAlert('❌ Errore di connessione: ' + error.message, 'error');
+                }
+            }
+            
+            showLoading(false);
+        });
+
+        // Avvia migrazione
+        document.getElementById('startMigration').addEventListener('click', async function() {
+            if (!confirm('⚠️ ATTENZIONE: Questa operazione modificherà permanentemente tutte le password nel database.\n\nSei sicuro di voler continuare?')) {
+                return;
+            }
+            
+            if (!confirm('🔒 Conferma: Hai un backup del file Excel e tutti gli utenti sono stati informati?')) {
+                return;
+            }
+            
+            await performMigration(false);
+        });
+
+        // Solo analisi
+        document.getElementById('analyzeOnly').addEventListener('click', async function() {
+            await analyzePasswords();
+        });
+
+        // Analizza password con gestione token automatica
+        async function analyzePasswords() {
+            showLoading(true);
+            showProgress(true);
+            
+            try {
+                updateProgress(20, 'Verifica token di accesso...');
+                await checkTokenStatus();
+                
+                updateProgress(40, 'Analisi password in corso...');
+                
+                const result = await apiCallWithAutoRefresh('migrate_passwords.php', 'analyze', {});
+                
+                updateProgress(80, 'Elaborazione risultati...');
+                
+                updateProgress(100, 'Analisi completata!');
+                
+                if (result.success) {
+                    const analysis = result.analysis;
+                    let message = `📊 **Analisi Password Completata**\n\n`;
+                    message += `👥 **Totale utenti**: ${analysis.total_users}\n`;
+                    message += `🔓 **Password legacy da migrare**: ${analysis.legacy_passwords}\n`;
+                    message += `🔒 **Password già hashate**: ${analysis.hashed_passwords}\n`;
+                    message += `⚠️ **Password vuote**: ${analysis.empty_passwords}\n`;
+                    
+                    if (analysis.legacy_passwords > 0) {
+                        message += `\n🔄 **Utenti da migrare**:\n`;
+                        analysis.users_to_migrate.slice(0, 5).forEach(user => {
+                            message += `• ${user.email}\n`;
+                        });
+                        if (analysis.users_to_migrate.length > 5) {
+                            message += `... e altri ${analysis.users_to_migrate.length - 5} utenti\n`;
+                        }
+                    }
+                    
+                    showAlert(message.replace(/\n/g, '<br>'), analysis.legacy_passwords > 0 ? 'warning' : 'success');
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                if (error.message.includes('Riautorizzazione richiesta') || 
+                    error.message.includes('Token di accesso')) {
+                    showAlert('🔄 Token scaduto durante l\'analisi. <a href="authorize_excel.php" style="color: inherit; text-decoration: underline;">Riautorizza l\'accesso</a>', 'warning');
+                } else {
+                    showAlert('❌ Errore durante analisi: ' + error.message, 'error');
+                }
+            }
+            
+            showLoading(false);
+            setTimeout(() => showProgress(false), 2000);
+        }
+
+        // Esegue la migrazione con gestione token automatica
+        async function performMigration(dryRun = false) {
+            showLoading(true);
+            showProgress(true);
+            
+            try {
+                updateProgress(10, 'Verifica token di accesso...');
+                await checkTokenStatus();
+                
+                updateProgress(20, 'Preparazione migrazione...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(40, 'Connessione al file Excel...');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(60, dryRun ? 'Simulazione migrazione...' : 'Migrazione password...');
+                
+                const result = await apiCallWithAutoRefresh('migrate_passwords.php', 'migrate', { 
+                    dry_run: dryRun 
+                });
+                
+                updateProgress(90, 'Elaborazione risultati...');
+                
+                updateProgress(100, 'Completato!');
+                
+                if (result.success) {
+                    const results = result.results;
+                    let message = `✅ **${dryRun ? 'Simulazione' : 'Migrazione'} Completata**\n\n`;
+                    message += `📊 **Statistiche**:\n`;
+                    message += `• Utenti elaborati: ${results.total_processed}\n`;
+                    message += `• Password migrate: ${results.migrated}\n`;
+                    message += `• Già hashate: ${results.already_hashed}\n`;
+                    message += `• Password vuote saltate: ${results.empty_skipped}\n`;
+                    
+                    if (results.errors.length > 0) {
+                        message += `\n⚠️ **Errori** (${results.errors.length}):\n`;
+                        results.errors.slice(0, 3).forEach(error => {
+                            message += `• ${error.email}: ${error.error}\n`;
+                        });
+                    }
+                    
+                    showAlert(message.replace(/\n/g, '<br>'), results.errors.length > 0 ? 'warning' : 'success');
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                updateProgress(0, 'Errore!');
+                if (error.message.includes('Riautorizzazione richiesta') || 
+                    error.message.includes('Token di accesso')) {
+                    showAlert('🔄 Token scaduto durante la migrazione. <a href="authorize_excel.php" style="color: inherit; text-decoration: underline;">Riautorizza l\'accesso</a>', 'warning');
+                } else {
+                    showAlert('❌ Errore durante migrazione: ' + error.message, 'error');
+                }
+            }
+            
+            showLoading(false);
+            setTimeout(() => showProgress(false), 2000);
+        }
+
+        // Utility functions
+        function showAlert(message, type) {
+            const alertsContainer = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = message;
+            
+            alertsContainer.innerHTML = '';
+            alertsContainer.appendChild(alert);
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showProgress(show) {
+            document.getElementById('migrationProgress').style.display = show ? 'block' : 'none';
+            if (!show) {
+                updateProgress(0, '');
+            }
+        }
+
+        function updateProgress(percentage, text) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = text;
+        }
+
+        // Controllo autenticazione e token all'avvio
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verifica prima lo stato del token
+            showAlert('🔄 Verifica connessione sistema...', 'info');
+            
+            try {
+                const tokenOk = await checkTokenStatus();
+                
+                if (!tokenOk) {
+                    showAlert('⚠️ Problema con il token di accesso. <a href="authorize_excel.php" style="color: inherit; text-decoration: underline;">Riautorizza se necessario</a>', 'warning');
+                    return;
+                }
+                
+                // Poi controlla l'autenticazione admin
+                const response = await fetch('migrate_passwords.php?action=check-auth', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.authenticated) {
+                        document.getElementById('auth-form').style.display = 'none';
+                        document.getElementById('migration-panel').style.display = 'block';
+                        showAlert('✅ Sessione amministratore attiva', 'success');
+                        await analyzePasswords();
+                        return;
+                    }
+                }
+                
+                // Nessuna sessione admin valida
+                showAlert('🔐 Inserisci la password amministratore per continuare', 'info');
+                
+            } catch (error) {
+                showAlert('❌ Errore durante l\'inizializzazione: ' + error.message, 'error');
+            }
+        });
+
+        // Funzione per refresh manuale del token nel migration tool
+        async function refreshTokenMigration() {
+            const btn = document.getElementById('refreshTokenBtn');
+            const originalText = btn.innerHTML;
+            
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '🔄 Rinnovando...';
+                
+                const response = await fetch('migrate_passwords.php?action=refresh-token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ Token rinnovato con successo!', 'success');
+                    setTimeout(() => {
+                        const alerts = document.querySelectorAll('.alert-success');
+                        alerts.forEach(alert => {
+                            if (alert.textContent.includes('Token rinnovato')) {
+                                alert.style.opacity = '0';
+                                setTimeout(() => alert.remove(), 300);
+                            }
+                        });
+                    }, 3000);
+                } else {
+                    showAlert('❌ Impossibile rinnovare il token: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Errore durante il rinnovo del token', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // Event listener per il pulsante refresh token
+        document.addEventListener('DOMContentLoaded', function() {
+            const refreshBtn = document.getElementById('refreshTokenBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', refreshTokenMigration);
+            }
+        });
+    </script>
+</body>
+</html>
